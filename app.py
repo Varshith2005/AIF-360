@@ -256,11 +256,224 @@ if step == "3. Run Pipeline":
 
                 st.success("✅ Pipeline completed successfully!")
 
+# # ======================
+# # STEP 4: RESULTS
+# # ======================
+# if step == "4. Results":
+#     st.header("📊 Fairness Analysis Results")
+
+#     if "results" not in st.session_state:
+#         st.warning("⚠️ Please run the pipeline first")
+#     else:
+#         thresholds = st.session_state.get("thresholds_used", {
+#             "SPD": 0.10,
+#             "DI_lower": 0.80,
+#             "DI_upper": 1.00,
+#             "EOD": 0.10,
+#             "AOD": 0.10
+#         })
+        
+#         # Extract threshold values
+#         spd_thresh = thresholds.get('SPD', 0.10)
+#         di_lower = thresholds.get('DI_lower', 0.80)
+#         di_upper = thresholds.get('DI_upper', 1.00)
+#         eod_thresh = thresholds.get('EOD', 0.10)
+#         aod_thresh = thresholds.get('AOD', 0.10)
+        
+#         # Display results for each stage
+#         for stage, metrics in st.session_state["results"].items():
+#             with st.expander(f"📌 {stage}", expanded=(stage == st.session_state.get("best", ""))):
+#                 # Create metrics table
+#                 metrics_data = []
+                
+#                 # SPD
+#                 spd_val = abs(metrics["SPD"])
+#                 spd_fair = spd_val <= spd_thresh
+#                 metrics_data.append({
+#                     "Sl No": 1,
+#                     "Metric": "SPD (Statistical Parity Difference)",
+#                     "Threshold Range": f"≤ {spd_thresh}",
+#                     "Actual Value": f"{metrics['SPD']:+.4f}",
+#                     "Fair or Unfair": "✅ Fair" if spd_fair else "❌ Unfair"
+#                 })
+                
+#                 # DI - using range 0.8 to 1.0
+#                 di_val = metrics["DI"]
+#                 di_fair = di_lower <= di_val <= di_upper
+#                 metrics_data.append({
+#                     "Sl No": 2,
+#                     "Metric": "DI (Disparate Impact)",
+#                     "Threshold Range": f"{di_lower} - {di_upper}",
+#                     "Actual Value": f"{di_val:.4f}",
+#                     "Fair or Unfair": "✅ Fair" if di_fair else "❌ Unfair"
+#                 })
+                
+#                 # EOD
+#                 eod_val = abs(metrics["EOD"])
+#                 eod_fair = eod_val <= eod_thresh
+#                 metrics_data.append({
+#                     "Sl No": 3,
+#                     "Metric": "EOD (Equal Opportunity Difference)",
+#                     "Threshold Range": f"≤ {eod_thresh}",
+#                     "Actual Value": f"{metrics['EOD']:+.4f}",
+#                     "Fair or Unfair": "✅ Fair" if eod_fair else "❌ Unfair"
+#                 })
+                
+#                 # AOD
+#                 aod_val = abs(metrics["AOD"])
+#                 aod_fair = aod_val <= aod_thresh
+#                 metrics_data.append({
+#                     "Sl No": 4,
+#                     "Metric": "AOD (Average Odds Difference)",
+#                     "Threshold Range": f"≤ {aod_thresh}",
+#                     "Actual Value": f"{metrics['AOD']:+.4f}",
+#                     "Fair or Unfair": "✅ Fair" if aod_fair else "❌ Unfair"
+#                 })
+                
+#                 # Performance metrics
+#                 metrics_data.append({
+#                     "Sl No": 5,
+#                     "Metric": "Accuracy",
+#                     "Threshold Range": "N/A",
+#                     "Actual Value": f"{metrics['Accuracy']:.4f}",
+#                     "Fair or Unfair": "N/A"
+#                 })
+                
+#                 metrics_data.append({
+#                     "Sl No": 6,
+#                     "Metric": "F1 Score",
+#                     "Threshold Range": "N/A",
+#                     "Actual Value": f"{metrics['F1']:.4f}",
+#                     "Fair or Unfair": "N/A"
+#                 })
+                
+#                 metrics_data.append({
+#                     "Sl No": 7,
+#                     "Metric": "Precision",
+#                     "Threshold Range": "N/A",
+#                     "Actual Value": f"{metrics['Precision']:.4f}",
+#                     "Fair or Unfair": "N/A"
+#                 })
+                
+#                 metrics_data.append({
+#                     "Sl No": 8,
+#                     "Metric": "Recall",
+#                     "Threshold Range": "N/A",
+#                     "Actual Value": f"{metrics['Recall']:.4f}",
+#                     "Fair or Unfair": "N/A"
+#                 })
+                
+#                 df_metrics = pd.DataFrame(metrics_data)
+#                 st.table(df_metrics)
+        
+#         # Display only fairness and performance graphs
+#         st.subheader("📈 Visualization")
+#         fig = st.session_state["fig"]
+        
+#         # Extract only the first two subplots (fairness and performance)
+#         if hasattr(fig, 'axes'):
+#             # Create a new figure with only the first two subplots
+#             import matplotlib.pyplot as plt
+#             fig2, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
+#             fig2.patch.set_facecolor("#FFFFFF")
+            
+#             # Copy fairness plot
+#             fairness_data = []
+#             stages = list(st.session_state["results"].keys())
+#             for i, stage in enumerate(stages):
+#                 metrics = st.session_state["results"][stage]
+#                 # Calculate DI deviation
+#                 di_val = metrics['DI']
+#                 if di_val < di_lower:
+#                     di_dev = di_lower - di_val
+#                 elif di_val > di_upper:
+#                     di_dev = di_val - di_upper
+#                 else:
+#                     di_dev = 0
+                
+#                 fairness_data.append({
+#                     'stage': stage,
+#                     'SPD': abs(metrics['SPD']),
+#                     'DI_dev': di_dev,
+#                     'EOD': abs(metrics['EOD']),
+#                     'AOD': abs(metrics['AOD'])
+#                 })
+            
+#             df_fairness = pd.DataFrame(fairness_data)
+#             x = np.arange(len(stages))
+#             width = 0.2
+            
+#             # Plot fairness metrics
+#             bars1 = ax1.bar(x - 1.5*width, df_fairness['SPD'], width, label='SPD', color='#4C72B0', alpha=0.8)
+#             bars2 = ax1.bar(x - 0.5*width, df_fairness['DI_dev'], width, label='DI Deviation', color='#E24B4A', alpha=0.8)
+#             bars3 = ax1.bar(x + 0.5*width, df_fairness['EOD'], width, label='EOD', color='#55A868', alpha=0.8)
+#             bars4 = ax1.bar(x + 1.5*width, df_fairness['AOD'], width, label='AOD', color='#C44E52', alpha=0.8)
+            
+#             # Add threshold lines
+#             ax1.axhline(y=spd_thresh, color='#4C72B0', linestyle='--', linewidth=1, alpha=0.7, label=f'SPD Threshold ({spd_thresh})')
+#             ax1.axhline(y=eod_thresh, color='#55A868', linestyle='--', linewidth=1, alpha=0.7, label=f'EOD Threshold ({eod_thresh})')
+#             ax1.axhline(y=aod_thresh, color='#C44E52', linestyle='--', linewidth=1, alpha=0.7, label=f'AOD Threshold ({aod_thresh})')
+            
+#             # Highlight bars that exceed thresholds
+#             for i, (spd, di_dev, eod, aod) in enumerate(zip(df_fairness['SPD'], df_fairness['DI_dev'], 
+#                                                               df_fairness['EOD'], df_fairness['AOD'])):
+#                 if spd > spd_thresh:
+#                     ax1.bar(i - 1.5*width, spd, width, color='#4C72B0', alpha=0.8, edgecolor='red', linewidth=2)
+#                 if di_dev > 0:  # Any DI deviation is bad
+#                     ax1.bar(i - 0.5*width, di_dev, width, color='#E24B4A', alpha=0.8, edgecolor='red', linewidth=2)
+#                 if eod > eod_thresh:
+#                     ax1.bar(i + 0.5*width, eod, width, color='#55A868', alpha=0.8, edgecolor='red', linewidth=2)
+#                 if aod > aod_thresh:
+#                     ax1.bar(i + 1.5*width, aod, width, color='#C44E52', alpha=0.8, edgecolor='red', linewidth=2)
+            
+#             ax1.set_xlabel('Stages')
+#             ax1.set_ylabel('Absolute Deviation')
+#             ax1.set_title('Fairness Metrics (lower = better)\n🔴 Red border indicates threshold violation', fontweight='bold')
+#             ax1.set_xticks(x)
+#             ax1.set_xticklabels(stages, rotation=45, ha='right')
+#             ax1.legend(loc='upper right', fontsize=8)
+#             ax1.grid(True, alpha=0.3)
+#             ax1.set_facecolor('#F8F9FA')
+            
+#             # Plot performance metrics
+#             perf_data = []
+#             for stage in stages:
+#                 metrics = st.session_state["results"][stage]
+#                 perf_data.append({
+#                     'stage': stage,
+#                     'Accuracy': metrics['Accuracy'],
+#                     'F1': metrics['F1'],
+#                     'Precision': metrics['Precision'],
+#                     'Recall': metrics['Recall']
+#                 })
+            
+#             df_perf = pd.DataFrame(perf_data)
+            
+#             ax2.bar(x - 1.5*width, df_perf['Accuracy'], width, label='Accuracy', color='#2196F3', alpha=0.8)
+#             ax2.bar(x - 0.5*width, df_perf['F1'], width, label='F1', color='#4CAF50', alpha=0.8)
+#             ax2.bar(x + 0.5*width, df_perf['Precision'], width, label='Precision', color='#FF9800', alpha=0.8)
+#             ax2.bar(x + 1.5*width, df_perf['Recall'], width, label='Recall', color='#9C27B0', alpha=0.8)
+            
+#             ax2.set_xlabel('Stages')
+#             ax2.set_ylabel('Score')
+#             ax2.set_title('Performance Metrics (higher = better)', fontweight='bold')
+#             ax2.set_xticks(x)
+#             ax2.set_xticklabels(stages, rotation=45, ha='right')
+#             ax2.set_ylim(0, 1)
+#             ax2.legend(loc='lower right', fontsize=8)
+#             ax2.grid(True, alpha=0.3)
+#             ax2.set_facecolor('#F8F9FA')
+            
+#             plt.tight_layout()
+#             st.pyplot(fig2)
+#             plt.close(fig2)
+
 # ======================
 # STEP 4: RESULTS
 # ======================
 if step == "4. Results":
-    st.header("📊 Fairness Analysis Results")
+    protected_attr = st.session_state.get("protected", "Unknown")
+    st.header(f"📊 Fairness Analysis Results of {protected_attr}")+
 
     if "results" not in st.session_state:
         st.warning("⚠️ Please run the pipeline first")
@@ -297,7 +510,7 @@ if step == "4. Results":
                     "Fair or Unfair": "✅ Fair" if spd_fair else "❌ Unfair"
                 })
                 
-                # DI - using range 0.8 to 1.0
+                # DI - using range di_lower to di_upper
                 di_val = metrics["DI"]
                 di_fair = di_lower <= di_val <= di_upper
                 metrics_data.append({
@@ -366,6 +579,15 @@ if step == "4. Results":
                 df_metrics = pd.DataFrame(metrics_data)
                 st.table(df_metrics)
         
+        # Display protected attribute information
+        if "protected" in st.session_state:
+            protected_attr = st.session_state["protected"]
+            st.markdown(f"""
+            <div style="background: #F0F2F6; padding: 10px; border-radius: 8px; margin-bottom: 20px;">
+                <span style="font-weight: bold;">🛡️ Protected Attribute:</span> {protected_attr}
+            </div>
+            """, unsafe_allow_html=True)
+        
         # Display only fairness and performance graphs
         st.subheader("📈 Visualization")
         fig = st.session_state["fig"]
@@ -414,12 +636,12 @@ if step == "4. Results":
             ax1.axhline(y=eod_thresh, color='#55A868', linestyle='--', linewidth=1, alpha=0.7, label=f'EOD Threshold ({eod_thresh})')
             ax1.axhline(y=aod_thresh, color='#C44E52', linestyle='--', linewidth=1, alpha=0.7, label=f'AOD Threshold ({aod_thresh})')
             
-            # Highlight bars that exceed thresholds
+            # Highlight bars that exceed thresholds (mark as unfair)
             for i, (spd, di_dev, eod, aod) in enumerate(zip(df_fairness['SPD'], df_fairness['DI_dev'], 
                                                               df_fairness['EOD'], df_fairness['AOD'])):
                 if spd > spd_thresh:
                     ax1.bar(i - 1.5*width, spd, width, color='#4C72B0', alpha=0.8, edgecolor='red', linewidth=2)
-                if di_dev > 0:  # Any DI deviation is bad
+                if di_dev > 0:  # Any DI deviation is bad (unfair)
                     ax1.bar(i - 0.5*width, di_dev, width, color='#E24B4A', alpha=0.8, edgecolor='red', linewidth=2)
                 if eod > eod_thresh:
                     ax1.bar(i + 0.5*width, eod, width, color='#55A868', alpha=0.8, edgecolor='red', linewidth=2)
@@ -428,7 +650,7 @@ if step == "4. Results":
             
             ax1.set_xlabel('Stages')
             ax1.set_ylabel('Absolute Deviation')
-            ax1.set_title('Fairness Metrics (lower = better)\n🔴 Red border indicates threshold violation', fontweight='bold')
+            ax1.set_title('Fairness Metrics (lower = better)\n🔴 Red border indicates threshold violation (Unfair)', fontweight='bold')
             ax1.set_xticks(x)
             ax1.set_xticklabels(stages, rotation=45, ha='right')
             ax1.legend(loc='upper right', fontsize=8)
